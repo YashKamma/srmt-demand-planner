@@ -1,58 +1,86 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&amp;family=Source+Sans+3:wght@400;500;600;700&amp;display=swap">
+<style id="gateStyle">
+  #authGate{position:fixed;inset:0;background:#2b2118e6;display:flex;align-items:center;justify-content:center;z-index:9999;font-family:'Source Sans 3',system-ui,-apple-system,"Segoe UI",sans-serif;box-sizing:border-box;padding:16px;}
+  #authGate .gate-card{background:#fffdf9;border-radius:12px;padding:28px 24px;width:100%;max-width:340px;box-shadow:0 10px 40px rgba(30,20,5,.4);box-sizing:border-box;border:1px solid #e0d3ba;}
+  #authGate h2{margin:0 0 4px;font-size:1.2rem;color:#2b2118;font-family:'Fraunces',Georgia,serif;font-weight:700;}
+  #authGate p{margin:0 0 18px;font-size:.82rem;color:#6b5c48;}
+  #authGate label{display:block;font-size:.75rem;font-weight:600;color:#6b5c48;margin:12px 0 5px;}
+  #authGate input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid #e0d3ba;font-size:.9rem;box-sizing:border-box;background:#fff;color:#2b2118;}
+  #authGate button{width:100%;margin-top:18px;padding:10px;border:none;border-radius:8px;background:#b5502e;color:#fff;font-size:.88rem;font-weight:600;cursor:pointer;}
+  #authGate button:hover{background:#953f22;}
+  #authGate .gate-err{color:#a23b2a;font-size:.8rem;margin-top:10px;display:none;}
+</style>
+<div id="authGate">
+  <form class="gate-card" id="gateForm" autocomplete="off">
+    <h2>SRMT Demand Planner</h2>
+    <p>Sign in to view this dashboard.</p>
+    <label for="gateUser">Username</label>
+    <input type="text" id="gateUser" autocomplete="username" required>
+    <label for="gatePass">Password</label>
+    <input type="password" id="gatePass" autocomplete="current-password" required>
+    <button type="submit">Sign in</button>
+    <div class="gate-err" id="gateErr">Wrong username or password.</div>
+  </form>
+</div>
+
 <title>SRMT Demand Planner</title>
 <meta name="description" content="Forecasts SRMT's next purchase order from PO history so raw-material buying stays ahead of demand.">
 <style>
 :root{
   color-scheme: light;
-  --bg:#ffffff;
-  --surface:#ffffff;
-  --surface-2:#f6f7f9;
-  --surface-3:#eef0f3;
-  --ink:#14161a;
-  --ink-2:#5b616e;
-  --ink-muted:#95999f;
-  --border:#e7e9ec;
-  --shadow-sm:0 1px 2px rgba(16,24,40,.04);
-  --shadow-md:0 4px 14px rgba(16,24,40,.07);
-  --accent:#2f6fed;
-  --accent-2:#1f56c9;
-  --accent-soft:#eef3ff;
-  --good:#1a9161;
-  --good-bg:#e9f8f0;
-  --warning:#b9720a;
-  --warning-bg:#fef3e2;
-  --critical:#d33a3a;
-  --critical-bg:#fdecec;
-  --series-1:#2f6fed;
-  --series-2:#f2994a;
+  --font-head:'Fraunces',Georgia,serif;
+  --font-body:'Source Sans 3',system-ui,-apple-system,"Segoe UI",sans-serif;
+  --bg:#f4ede1;
+  --surface:#fffdf9;
+  --surface-2:#ece2d0;
+  --surface-3:#e2d5bd;
+  --ink:#2b2118;
+  --ink-2:#6b5c48;
+  --ink-muted:#9c8b72;
+  --border:#e0d3ba;
+  --shadow-sm:0 1px 2px rgba(60,40,10,.06);
+  --shadow-md:0 4px 14px rgba(60,40,10,.12);
+  --accent:#b5502e;
+  --accent-2:#953f22;
+  --accent-soft:#f3ddc4;
+  --good:#4f7a3c;
+  --good-bg:#e4ecd8;
+  --warning:#95541f;
+  --warning-bg:#f6e4c9;
+  --critical:#a23b2a;
+  --critical-bg:#f5ded2;
+  --series-1:#b5502e;
+  --series-2:#8a9a52;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     color-scheme: dark;
-    --bg:#0e0f12; --surface:#181a1f; --surface-2:#202228; --surface-3:#262933;
-    --ink:#f2f3f5; --ink-2:#b7bcc4; --ink-muted:#7d828b; --border:#2b2e36;
+    --bg:#20190f; --surface:#2b2118; --surface-2:#352a1c; --surface-3:#3f3222;
+    --ink:#f4ede1; --ink-2:#d3c2a4; --ink-muted:#a08e72; --border:#4a3c29;
     --shadow-sm:0 1px 2px rgba(0,0,0,.3); --shadow-md:0 4px 14px rgba(0,0,0,.4);
-    --accent:#5b8dff; --accent-2:#7ea3ff; --accent-soft:#182238;
-    --good:#3ec98a; --good-bg:#0f2a20; --warning:#e0a838; --warning-bg:#332608;
-    --critical:#f0716f; --critical-bg:#341717;
-    --series-1:#5b8dff; --series-2:#f2a35e;
+    --accent:#e07a4f; --accent-2:#ef9068; --accent-soft:#3d2a1c;
+    --good:#8fb87a; --good-bg:#22331e; --warning:#e0a838; --warning-bg:#3a2c10;
+    --critical:#e0836f; --critical-bg:#3a201a;
+    --series-1:#e07a4f; --series-2:#c1a85f;
   }
 }
 :root[data-theme="dark"]{
   color-scheme: dark;
-  --bg:#0e0f12; --surface:#181a1f; --surface-2:#202228; --surface-3:#262933;
-  --ink:#f2f3f5; --ink-2:#b7bcc4; --ink-muted:#7d828b; --border:#2b2e36;
+  --bg:#20190f; --surface:#2b2118; --surface-2:#352a1c; --surface-3:#3f3222;
+  --ink:#f4ede1; --ink-2:#d3c2a4; --ink-muted:#a08e72; --border:#4a3c29;
   --shadow-sm:0 1px 2px rgba(0,0,0,.3); --shadow-md:0 4px 14px rgba(0,0,0,.4);
-  --accent:#5b8dff; --accent-2:#7ea3ff; --accent-soft:#182238;
-  --good:#3ec98a; --good-bg:#0f2a20; --warning:#e0a838; --warning-bg:#332608;
-  --critical:#f0716f; --critical-bg:#341717;
-  --series-1:#5b8dff; --series-2:#f2a35e;
+  --accent:#e07a4f; --accent-2:#ef9068; --accent-soft:#3d2a1c;
+  --good:#8fb87a; --good-bg:#22331e; --warning:#e0a838; --warning-bg:#3a2c10;
+  --critical:#e0836f; --critical-bg:#3a201a;
+  --series-1:#e07a4f; --series-2:#c1a85f;
 }
 *{box-sizing:border-box;}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;padding:0 18px;}
+html{overflow-x:hidden;font-size:17.5px;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);padding:0 18px;overflow-x:hidden;max-width:100vw;}
 .wrap{max-width:1180px;margin:0 auto;padding-block:26px 60px;}
 header.page{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;align-items:flex-end;margin-bottom:22px;}
-h1{font-size:1.5rem;margin:0 0 4px;letter-spacing:-0.01em;font-weight:700;}
+h1{font-size:1.5rem;margin:0 0 4px;letter-spacing:-0.01em;font-weight:700;font-family:var(--font-head);}
 .subtitle{color:var(--ink-2);font-size:.9rem;max-width:58ch;}
 .meta{font-size:.78rem;color:var(--ink-muted);text-align:right;}
 section{margin-bottom:30px;}
@@ -68,7 +96,7 @@ section{margin-bottom:30px;}
 .global-lookup input[type=search]{width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--border);background:var(--surface-2);color:var(--ink);font-size:.92rem;}
 .global-lookup input[type=search]:focus{outline:2px solid var(--accent);outline-offset:-1px;}
 #globalLookupResults{margin-top:10px;}
-h2{font-size:1.05rem;margin:0 0 12px;letter-spacing:-0.005em;font-weight:700;}
+h2{font-size:1.05rem;margin:0 0 12px;letter-spacing:-0.005em;font-weight:700;font-family:var(--font-head);}
 h2 .h2-sub{font-weight:400;color:var(--ink-2);font-size:.85rem;margin-left:8px;}
 
 /* cards / surfaces */
@@ -79,7 +107,7 @@ h2 .h2-sub{font-weight:400;color:var(--ink-2);font-size:.85rem;margin-left:8px;}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;}
 .kpi{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow-sm);}
 .kpi .label{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-muted);margin-bottom:8px;font-weight:600;}
-.kpi .value{font-size:1.75rem;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.01em;}
+.kpi .value{font-size:1.75rem;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.01em;font-family:var(--font-head);}
 .kpi .sub{font-size:.78rem;color:var(--ink-2);margin-top:3px;}
 
 /* status pill */
@@ -94,7 +122,7 @@ h2 .h2-sub{font-weight:400;color:var(--ink-2);font-size:.85rem;margin-left:8px;}
 .forecast-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;}
 .fc-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;box-shadow:var(--shadow-sm);}
 .fc-card .code{font-size:.72rem;color:var(--ink-muted);font-variant-numeric:tabular-nums;}
-.fc-card .desc{font-size:.9rem;font-weight:600;line-height:1.25;}
+.fc-card .desc{font-size:.9rem;font-weight:600;line-height:1.25;font-family:var(--font-head);}
 .fc-card .row{display:flex;justify-content:space-between;align-items:baseline;font-size:.8rem;color:var(--ink-2);}
 .fc-card .qty{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink);}
 
@@ -102,7 +130,7 @@ h2 .h2-sub{font-weight:400;color:var(--ink-2);font-size:.85rem;margin-left:8px;}
 .po-hero{padding:24px 26px;cursor:pointer;transition:box-shadow .15s;}
 .po-hero:hover{box-shadow:var(--shadow-md);}
 .po-hero-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);font-weight:700;margin-bottom:10px;}
-.po-hero-date{font-size:1.9rem;font-weight:700;letter-spacing:-.01em;margin-bottom:6px;}
+.po-hero-date{font-size:1.9rem;font-weight:700;letter-spacing:-.01em;margin-bottom:6px;font-family:var(--font-head);}
 .po-hero-meta{display:flex;gap:18px;flex-wrap:wrap;color:var(--ink-2);font-size:.85rem;}
 .po-hero-meta b{color:var(--ink);font-variant-numeric:tabular-nums;}
 .po-hero-cta{margin-top:16px;display:flex;align-items:center;gap:6px;color:var(--accent);font-weight:600;font-size:.85rem;}
@@ -111,18 +139,18 @@ h2 .h2-sub{font-weight:400;color:var(--ink-2);font-size:.85rem;margin-left:8px;}
 
 .month-panel{margin-top:16px;}
 .month-panel-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
-.month-panel-head h3{font-size:1rem;margin:0;font-weight:700;}
+.month-panel-head h3{font-size:1rem;margin:0;font-weight:700;font-family:var(--font-head);}
 .month-panel-head select{padding:8px 12px;border-radius:9px;border:1px solid var(--border);background:var(--surface);color:var(--ink);font-size:.83rem;font-weight:600;}
 .po-list{display:flex;flex-direction:column;gap:10px;}
 .po-entry{border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow-sm);overflow:hidden;}
 .po-entry summary{list-style:none;cursor:pointer;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
 .po-entry summary::-webkit-details-marker{display:none;}
-.po-entry summary .po-date{font-weight:700;font-size:.95rem;}
+.po-entry summary .po-date{font-weight:700;font-size:.95rem;font-family:var(--font-head);}
 .po-entry summary .po-sub{color:var(--ink-2);font-size:.82rem;display:flex;gap:14px;flex-wrap:wrap;}
 .po-entry summary .po-sub b{color:var(--ink);font-variant-numeric:tabular-nums;}
 .po-entry summary .chev{color:var(--ink-muted);transition:transform .18s;}
 .po-entry[open] summary .chev{transform:rotate(90deg);}
-.po-entry .po-lines{border-top:1px solid var(--border);max-height:340px;overflow-y:auto;}
+.po-entry .po-lines{border-top:1px solid var(--border);max-height:340px;overflow-y:auto;overflow-x:auto;}
 .po-lines table{width:100%;border-collapse:collapse;font-size:.83rem;}
 .po-lines thead th{position:sticky;top:0;background:var(--surface-2);text-align:left;padding:8px 16px;font-size:.7rem;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-muted);}
 .po-lines td{padding:8px 16px;border-bottom:1px solid var(--surface-2);}
@@ -149,7 +177,7 @@ h2 .h2-sub{font-weight:400;color:var(--ink-2);font-size:.85rem;margin-left:8px;}
 .lookup-card.warning{border-left-color:var(--warning);}
 .lookup-card.critical{border-left-color:var(--critical);}
 .lookup-card .lk-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:4px;}
-.lookup-card .lk-desc{font-weight:700;font-size:.98rem;}
+.lookup-card .lk-desc{font-weight:700;font-size:.98rem;font-family:var(--font-head);}
 .lookup-card .lk-code{color:var(--ink-muted);font-size:.78rem;font-variant-numeric:tabular-nums;}
 .lookup-card .lk-stats{display:flex;gap:16px;flex-wrap:wrap;font-size:.8rem;color:var(--ink-2);margin:8px 0 10px;}
 .lookup-card .lk-stats b{color:var(--ink);font-variant-numeric:tabular-nums;}
@@ -214,13 +242,83 @@ td.code-cell{color:var(--ink-muted);}
 /* requirements */
 .req-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;}
 .req-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow-sm);}
-.req-card h3{margin:0 0 6px;font-size:.9rem;}
+.req-card h3{margin:0 0 6px;font-size:.9rem;font-family:var(--font-head);}
 .req-card p{margin:0;font-size:.82rem;color:var(--ink-2);line-height:1.5;}
 .note{font-size:.8rem;color:var(--ink-2);line-height:1.6;background:var(--surface-2);border-radius:14px;padding:14px 16px;}
 footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--border);font-size:.75rem;color:var(--ink-muted);}
+
+/* home tab: qty bars */
+.qbar-list{display:flex;flex-direction:column;gap:7px;max-height:640px;overflow-y:auto;padding-right:4px;}
+.qbar-row{display:grid;grid-template-columns:300px 1fr 80px;align-items:center;gap:14px;font-size:.85rem;}
+.qbar-label{color:var(--ink-2);white-space:normal;line-height:1.3;}
+.qbar-track{background:var(--surface-2);border-radius:6px;height:14px;overflow:hidden;}
+.qbar-fill{background:var(--accent);height:100%;border-radius:6px;min-width:3px;}
+.qbar-val{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;}
+.home-po-row{padding:14px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.po-date{font-family:var(--font-head);}
+.rawneed-card .rn-label{font-family:var(--font-head);}
+
+/* ---- responsive / mobile ---- */
+@media (max-width:640px){
+  body{padding:0 12px;}
+  .wrap{padding-block:16px 40px;}
+  header.page{flex-direction:column;align-items:flex-start;gap:8px;margin-bottom:16px;}
+  header.page .meta{text-align:left;}
+  h1{font-size:1.25rem;}
+  .subtitle{max-width:none;font-size:.85rem;}
+  section{margin-bottom:22px;}
+  h2{font-size:.98rem;}
+  h2 .h2-sub{display:block;margin-left:0;margin-top:3px;font-size:.78rem;}
+
+  .tabs{position:static;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;padding:4px;margin-bottom:18px;scrollbar-width:none;}
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab-btn{flex:0 0 auto;padding:8px 13px;font-size:.82rem;}
+
+  .global-lookup{padding:12px 14px;}
+
+  .kpis{grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;}
+  .kpi{padding:12px 14px;}
+  .kpi .value{font-size:1.4rem;}
+
+  .forecast-grid{grid-template-columns:1fr;}
+
+  .po-hero{padding:16px 16px;}
+  .po-hero-date{font-size:1.4rem;}
+  .po-hero-meta{gap:10px 16px;font-size:.8rem;}
+
+  .month-panel-head{flex-direction:column;align-items:stretch;}
+  .month-panel-head select{width:100%;}
+  .po-entry summary{padding:12px 14px;}
+  .po-lines td,.po-lines thead th{padding:7px 10px;}
+
+  .rawneed-grid{grid-template-columns:1fr;}
+
+  .chart-row{grid-template-columns:1fr;}
+  .panel{padding:14px 16px;}
+
+  .table-controls{flex-direction:column;align-items:stretch;}
+  .table-controls input[type=search],.table-controls select{width:100%;}
+  table{font-size:.76rem;}
+  tbody td,thead th{padding:8px 9px;}
+
+  .lk-layers{grid-template-columns:1fr;}
+
+  .stock-form{flex-direction:column;}
+  .stock-form input#matName,.stock-form input#matUnit,.stock-form input#matStock,.stock-form input#matReorder{width:100%;min-width:0;}
+  .stock-form button{width:100%;}
+
+  .req-grid{grid-template-columns:1fr;}
+
+  footer{font-size:.72rem;}
+
+  .qbar-row{grid-template-columns:1fr;gap:3px;}
+  .qbar-label{white-space:normal;}
+  .qbar-val{text-align:left;}
+  .home-po-row{padding:12px 14px;}
+}
 </style>
 
-<div class="wrap">
+<div class="wrap" id="appWrap" hidden>
   <header class="page">
     <div>
       <h1>SRMT Demand Planner</h1>
@@ -236,15 +334,45 @@ footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--border);font-
   </section>
 
   <nav class="tabs" id="tabNav">
+    <button class="tab-btn" data-tab="home">Home</button>
     <button class="tab-btn" data-tab="po">Purchase Orders</button>
+    <!-- Watchlist tab commented out for now.
     <button class="tab-btn" data-tab="watchlist">Watchlist <span class="tab-badge" id="watchBadge" hidden></span></button>
+    -->
     <button class="tab-btn" data-tab="volume">Volume &amp; cadence</button>
     <button class="tab-btn" data-tab="materials">All materials</button>
     <button class="tab-btn" data-tab="rawmat">Raw materials</button>
     <button class="tab-btn" data-tab="notes">Notes</button>
   </nav>
 
-  <div class="tab-panel" data-panel="po">
+  <div class="tab-panel" data-panel="home">
+    <section>
+      <div class="month-panel-head" style="margin-bottom:16px;">
+        <h2 style="margin:0;">This month <span class="h2-sub" id="homeMonthSub"></span></h2>
+        <select id="homeMonthSelect"></select>
+      </div>
+      <div class="kpis" id="homeKpis"></div>
+    </section>
+
+    <section>
+      <h2>Purchase orders <span class="h2-sub" id="homePoSub"></span></h2>
+      <div class="po-list" id="homePoList"></div>
+    </section>
+
+    <section>
+      <h2>Items needed <span class="h2-sub">quantity ordered this month, largest to smallest</span></h2>
+      <div class="panel">
+        <div id="homeQtyChart"></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Reels needed <span class="h2-sub">raw material required to cover this month's items &mdash; widths only, see Notes for reel-yield caveat</span></h2>
+      <div class="rawneed-grid" id="homeReelGrid"></div>
+    </section>
+  </div>
+
+  <div class="tab-panel" data-panel="po" hidden>
     <section>
       <div class="card po-hero" id="poHero"></div>
       <div class="month-panel" id="monthPanel" hidden>
@@ -257,12 +385,14 @@ footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--border);font-
     </section>
   </div>
 
+  <!-- Watchlist tab panel commented out for now. Uncomment along with the nav button above to re-enable.
   <div class="tab-panel" data-panel="watchlist" hidden>
   <section>
     <h2>Next PO watchlist <span class="h2-sub">materials whose historical order rhythm says they're due now or soon &mdash; stock these first</span></h2>
     <div class="forecast-grid" id="forecastGrid"></div>
   </section>
   </div>
+  -->
 
   <div class="tab-panel" data-panel="volume" hidden>
   <section>
@@ -443,6 +573,10 @@ footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--border);font-
         <h3>6. A live feed instead of PDFs</h3>
         <p>An email inbox, shared folder, or ERP export that drops each new PO in automatically would let this dashboard update itself instead of being re-built by hand.</p>
       </div>
+      <div class="req-card">
+        <h3>7. Dispatch / fulfillment tracking</h3>
+        <p>Right now the dashboard only knows what SRMT <b>ordered</b>, not what's actually been <b>dispatched</b> &mdash; so it can't yet show "ordered vs. shipped vs. remaining" per item. There's no fixed format for dispatch records today. Two ways to close this: (1) a manual dispatch log added to the dashboard (same pattern as the raw-material stock tracker) that you or the floor updates per shipment, or (2) once dispatch/billing emails exist, automate detection the same way the PO email check works &mdash; reliability there depends on some consistent marker (e.g. always starting the subject with <b>"SRMT Dispatch:"</b>), since with no consistent marker the routine has to guess from content alone.</p>
+      </div>
     </div>
   </section>
   </div>
@@ -486,7 +620,7 @@ const overdueCount = DATA.materials.filter(m=>m.status==='critical').length;
 const dueSoonCount = DATA.materials.filter(m=>m.status==='warning').length;
 const watchBadge = document.getElementById('watchBadge');
 const watchTotal = overdueCount+dueSoonCount;
-if(watchTotal>0){ watchBadge.hidden=false; watchBadge.textContent = watchTotal; }
+if(watchBadge && watchTotal>0){ watchBadge.hidden=false; watchBadge.textContent = watchTotal; }
 
 // ================= Purchase Orders tab =================
 (function(){
@@ -619,12 +753,123 @@ if(watchTotal>0){ watchBadge.hidden=false; watchBadge.textContent = watchTotal; 
   select.addEventListener('change', ()=> renderMonth(select.value));
 })();
 
+// ================= Home tab =================
+(function(){
+  const timeline = DATA.po_timeline.slice().sort((a,b)=> a.date<b.date?-1:1);
+  if(!timeline.length) return;
+  function monthKey(dateStr){ return dateStr.slice(0,7); }
+  function monthLabel(key){
+    const [y,m] = key.split('-').map(Number);
+    return new Date(y, m-1, 1).toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+  }
+  const monthsMap = {};
+  timeline.forEach(p=>{
+    const k = monthKey(p.date);
+    (monthsMap[k] = monthsMap[k]||[]).push(p);
+  });
+  const monthKeys = Object.keys(monthsMap).sort().reverse();
+  const currentMonthKey = monthKey(timeline[timeline.length-1].date);
+
+  const select = document.getElementById('homeMonthSelect');
+  select.innerHTML = monthKeys.map(k=>`<option value="${k}">${monthLabel(k)}</option>`).join('');
+
+  function render(key){
+    select.value = key;
+    const pos = (monthsMap[key]||[]).slice().sort((a,b)=> a.date<b.date?-1:1);
+    document.getElementById('homeMonthSub').textContent = monthLabel(key);
+
+    // aggregate every item ordered across all POs in this month
+    const itemAgg = {}; // code -> {desc, qty}
+    pos.forEach(p=>{
+      (DATA.po_items[p.date]||[]).forEach(it=>{
+        if(!itemAgg[it.code]) itemAgg[it.code] = {desc: it.desc, qty:0};
+        itemAgg[it.code].qty += it.qty;
+      });
+    });
+    const itemRows = Object.entries(itemAgg).map(([code,v])=>({code, desc:v.desc, qty:v.qty}));
+
+    // ---- KPIs ----
+    const totalPOs = pos.length;
+    const totalQty = pos.reduce((s,p)=>s+p.qty,0);
+    document.getElementById('homeKpis').innerHTML = `
+      <div class="kpi"><div class="label">Purchase orders</div><div class="value">${totalPOs}</div><div class="sub">received this month</div></div>
+      <div class="kpi"><div class="label">Distinct items</div><div class="value">${itemRows.length}</div><div class="sub">material codes ordered</div></div>
+      <div class="kpi"><div class="label">Total quantity</div><div class="value">${totalQty.toLocaleString()}</div><div class="sub">EA across all POs</div></div>
+    `;
+
+    // ---- 1. Purchase order info for the month ----
+    document.getElementById('homePoSub').textContent = `${totalPOs} order${totalPOs===1?'':'s'} in ${monthLabel(key)}`;
+    const poListEl = document.getElementById('homePoList');
+    poListEl.innerHTML = pos.length ? pos.map(p=>{
+      const d = new Date(p.date+'T00:00:00');
+      const items = (DATA.po_items[p.date]||[]).length;
+      const st = (DATA.po_status||{})[p.date];
+      const statusPill = st ? `<span class="pill ${st.complete?'good':'warning'}">${st.complete?'Fully billed':`${st.n_billed}/${st.n_total} billed`}</span>` : '';
+      return `<div class="po-entry home-po-row">
+        <span class="po-date">${fmt(d)}</span>
+        <span class="po-sub"><span><b>${items}</b> item${items===1?'':'s'}</span><span><b>${p.qty.toLocaleString()}</b> EA</span>${statusPill}</span>
+      </div>`;
+    }).join('') : `<div class="empty-note">No purchase orders on file for this month.</div>`;
+
+    // ---- 2. Items needed, increasing order of quantity ----
+    const sorted = itemRows.slice().sort((a,b)=>b.qty-a.qty);
+    const maxQty = sorted.length ? Math.max(...sorted.map(r=>r.qty)) : 1;
+    const chartEl = document.getElementById('homeQtyChart');
+    chartEl.innerHTML = sorted.length ? `<div class="qbar-list">${sorted.map(r=>`
+        <div class="qbar-row">
+          <div class="qbar-label" title="${r.desc}">${r.desc}</div>
+          <div class="qbar-track"><div class="qbar-fill" style="width:${Math.max(2, r.qty/maxQty*100)}%;"></div></div>
+          <div class="qbar-val">${r.qty.toLocaleString()}</div>
+        </div>`).join('')}</div>` : `<div class="empty-note">No items ordered this month.</div>`;
+
+    // ---- 3. Reels needed for this month's items ----
+    const reelNeed = {};    // reel label -> {qty, items:Map(desc->qty)}
+    const noSpec = {};      // desc -> qty (no board spec on file)
+    itemRows.forEach(it=>{
+      const layers = (DATA.item_reels||{})[it.code] || [];
+      if(!layers.length){
+        noSpec[it.desc] = (noSpec[it.desc]||0) + it.qty;
+      }
+      layers.forEach(reel=>{
+        const rk = `${reel.approx?'~':''}${reel.reel_label}`;
+        if(!reelNeed[rk]) reelNeed[rk] = {qty:0, items:new Map()};
+        reelNeed[rk].qty += it.qty;
+        reelNeed[rk].items.set(it.desc, (reelNeed[rk].items.get(it.desc)||0) + it.qty);
+      });
+    });
+    const reelRows = Object.entries(reelNeed).sort((a,b)=>b[1].qty-a[1].qty);
+    const noSpecRows = Object.entries(noSpec).sort((a,b)=>b[1]-a[1]);
+    const noSpecQty = noSpecRows.reduce((s,[,q])=>s+q,0);
+    const reelGridEl = document.getElementById('homeReelGrid');
+    if(!reelRows.length && !noSpecRows.length){
+      reelGridEl.innerHTML = `<div class="empty-note">No items ordered this month.</div>`;
+    } else {
+      reelGridEl.innerHTML = `
+        ${reelRows.map(([label,info])=>`<div class="rawneed-card">
+            <div class="rn-label">${label}</div>
+            <div class="rn-qty">${info.qty.toLocaleString()} EA of finished product</div>
+            <div class="rn-items"><ol>${[...info.items.entries()].sort((a,b)=>b[1]-a[1]).map(([desc,qty])=>`<li>${desc} &mdash; <b>${qty.toLocaleString()}</b></li>`).join('')}</ol></div>
+          </div>`).join('')}
+        ${noSpecRows.length?`<div class="rawneed-card">
+            <div class="rn-label" style="color:var(--critical);">No board spec available for these items</div>
+            <div class="rn-qty">${noSpecQty.toLocaleString()} EA</div>
+            <div class="rn-items"><ol>${noSpecRows.map(([desc,qty])=>`<li>${desc} &mdash; <b>${qty.toLocaleString()}</b></li>`).join('')}</ol></div>
+          </div>`:''}
+      `;
+    }
+  }
+
+  select.addEventListener('change', ()=> render(select.value));
+  render(currentMonthKey);
+})();
+
 // ---------- Forecast watchlist (critical + warning, sorted by urgency) ----------
 const watch = DATA.materials
   .filter(m=>m.status==='critical'||m.status==='warning')
   .sort((a,b)=>a.days_until_next-b.days_until_next)
   .slice(0,24);
-document.getElementById('forecastGrid').innerHTML = watch.map(m=>{
+const forecastGridEl = document.getElementById('forecastGrid');
+if(forecastGridEl) forecastGridEl.innerHTML = watch.map(m=>{
   const s = m.status;
   const dueTxt = m.days_until_next<0 ? `${Math.abs(m.days_until_next)}d overdue` : `due in ${m.days_until_next}d`;
   return `
@@ -961,7 +1206,36 @@ function switchTab(name){
 document.querySelectorAll('.tab-btn').forEach(b=>{
   b.addEventListener('click', ()=> switchTab(b.dataset.tab));
 });
-switchTab('po');
+switchTab('home');
+</script>
+
+
+<script>
+(function(){
+  var GATE_USER = "yash";
+  var GATE_PASS = "try1234";
+  var KEY = "srmt_dash_auth_ok";
+  var gate = document.getElementById('authGate');
+  var app = document.getElementById('appWrap');
+  function unlock(){
+    gate.style.display = 'none';
+    app.hidden = false;
+  }
+  if(localStorage.getItem(KEY) === '1'){
+    unlock();
+  }
+  document.getElementById('gateForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var u = document.getElementById('gateUser').value.trim();
+    var p = document.getElementById('gatePass').value;
+    if(u === GATE_USER && p === GATE_PASS){
+      localStorage.setItem(KEY, '1');
+      unlock();
+    } else {
+      document.getElementById('gateErr').style.display = 'block';
+    }
+  });
+})();
 </script>
 
 </body></html>
