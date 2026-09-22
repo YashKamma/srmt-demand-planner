@@ -415,10 +415,10 @@ footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--border);font-
 
   <div class="tab-panel" data-panel="queue" hidden>
     <section>
-      <h2>Review queue <span class="h2-sub" id="queueSub">emails the Gmail scanner flagged &mdash; forward/paste them to Claude to get them listed here</span></h2>
+      <h2>Review queue <span class="h2-sub" id="queueSub">emails from Gmail the scanner wasn't fully sure about</span></h2>
       <div class="empty-note" id="queueUnavailable" hidden>Live review queue needs this artifact's shared database, which isn't available in this preview.</div>
       <div id="queueApp" hidden>
-        <div class="empty-note" id="queueEmpty" hidden>Nothing waiting on you right now. The Gmail scan runs twice daily and emails you when it finds something &mdash; reply with the details here in Claude and it'll show up in this queue for you to confirm.</div>
+        <div class="empty-note" id="queueEmpty" hidden>Nothing waiting on you right now &mdash; the Gmail scan runs twice daily and only adds items here when it's unsure or spots a new PO.</div>
         <div id="queueList"></div>
       </div>
     </section>
@@ -1264,12 +1264,34 @@ function primaryReel(code){
   const emptyEl = document.getElementById('queueEmpty');
   const listEl = document.getElementById('queueList');
   const badgeEl = document.getElementById('queueBadge');
+  let seeded = false;
 
+  function slug(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'').slice(0,80) || ('q'+Date.now()); }
   function fmtWhen(iso){
     if(!iso) return '&mdash;';
     const d = new Date(iso);
     if(isNaN(d)) return iso;
     return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+  }
+
+  async function seedFromRepo(existingIds){
+    try{
+      const url = 'https://raw.githubusercontent.com/YashKamma/srmt-demand-planner/main/review_queue.json?t=' + Date.now();
+      const res = await fetch(url, {cache:'no-store'});
+      if(!res.ok) return; // file may not exist yet — that's fine
+      const entries = await res.json();
+      if(!Array.isArray(entries)) return;
+      for(const e of entries){
+        const id = slug(e.id || (e.sender+'-'+e.subject+'-'+e.date));
+        if(existingIds.has(id)) continue;
+        await col.doc(id).set({
+          sender: e.sender||'', subject: e.subject||'', date: e.date||'',
+          snippet: e.snippet||'', hasAttachment: !!e.has_attachment,
+          attachmentNames: e.attachment_names||'', category: e.category||'needs_review',
+          poDateGuess: e.po_date_guess||'', status: 'pending', addedAt: new Date().toISOString(), decidedAt: null,
+        });
+      }
+    }catch(e){ console.error('review queue seed failed', e); }
   }
 
   function render(docs){
@@ -1314,7 +1336,10 @@ function primaryReel(code){
   }
 
   col.orderBy('addedAt').onSnapshot(
-    snap => render(snap.docs),
+    async snap => {
+      if(!seeded){ seeded = true; await seedFromRepo(new Set(snap.docs.map(d=>d.id))); }
+      render(snap.docs);
+    },
     err => { console.error('review queue db error', err); }
   );
 })();
