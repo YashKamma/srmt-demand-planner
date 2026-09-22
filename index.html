@@ -315,7 +315,39 @@ footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--border);font-
   .qbar-label{white-space:normal;}
   .qbar-val{text-align:left;}
   .home-po-row{padding:12px 14px;}
+
+  .pipeline{flex-direction:column;gap:8px;}
+  .pipeline-arrow{transform:rotate(90deg);}
 }
+
+.pipeline{display:flex;align-items:center;gap:10px;margin:0 0 20px;padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-sm);}
+.pipeline-stage{display:flex;align-items:center;gap:9px;padding:8px 14px;border-radius:10px;flex:1;min-width:0;}
+.pipeline-stage .num{display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:99px;font-size:.75rem;font-weight:700;flex:0 0 auto;background:var(--surface-3);color:var(--ink-muted);}
+.pipeline-stage .txt{min-width:0;}
+.pipeline-stage .txt b{display:block;font-size:.85rem;font-family:var(--font-head);}
+.pipeline-stage .txt span{display:block;font-size:.7rem;color:var(--ink-muted);}
+.pipeline-stage.active{background:var(--accent-soft);}
+.pipeline-stage.active .num{background:var(--accent);color:#fff;}
+.pipeline-stage.active .txt b{color:var(--accent);}
+.pipeline-stage.soon{opacity:.55;}
+.pipeline-arrow{color:var(--ink-muted);flex:0 0 auto;font-size:1.1rem;}
+
+.queue-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin-bottom:12px;}
+.queue-card.pending{border-left:4px solid var(--warning);}
+.queue-card.confirmed{border-left:4px solid var(--good);}
+.queue-card.dismissed{border-left:4px solid var(--ink-muted);opacity:.65;}
+.queue-card.flagged{border-left:4px solid var(--critical);}
+.queue-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;}
+.queue-head h4{margin:0;font-family:var(--font-head);font-size:1rem;}
+.queue-meta{font-size:.78rem;color:var(--ink-muted);margin-top:3px;}
+.queue-snippet{font-size:.82rem;color:var(--ink-2);margin:10px 0;line-height:1.45;}
+.queue-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.queue-actions button{border:1px solid var(--border);background:var(--surface-2);color:var(--ink);font-family:inherit;font-size:.78rem;font-weight:600;padding:7px 13px;border-radius:9px;cursor:pointer;}
+.queue-actions button:hover{background:var(--surface-3);}
+.queue-actions button.confirm{border-color:var(--good);color:var(--good);}
+.queue-actions button.dismiss{border-color:var(--ink-muted);}
+.queue-actions button.flag{border-color:var(--critical);color:var(--critical);}
+.queue-decided-note{font-size:.78rem;color:var(--ink-muted);margin-top:8px;font-style:italic;}
 </style>
 
 <div class="wrap" id="appWrap" hidden>
@@ -333,8 +365,17 @@ footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--border);font-
     <div id="globalLookupResults"></div>
   </section>
 
+  <div class="pipeline">
+    <div class="pipeline-stage active"><div class="num">1</div><div class="txt"><b>Purchase Orders</b><span>Gmail scan &rarr; triage &rarr; dashboard</span></div></div>
+    <div class="pipeline-arrow">&rarr;</div>
+    <div class="pipeline-stage soon"><div class="num">2</div><div class="txt"><b>Stock Check</b><span>Coming soon</span></div></div>
+    <div class="pipeline-arrow">&rarr;</div>
+    <div class="pipeline-stage soon"><div class="num">3</div><div class="txt"><b>Dispatch &amp; Pending</b><span>Coming soon</span></div></div>
+  </div>
+
   <nav class="tabs" id="tabNav">
     <button class="tab-btn" data-tab="home">Home</button>
+    <button class="tab-btn" data-tab="queue">Review Queue <span class="tab-badge" id="queueBadge" hidden></span></button>
     <button class="tab-btn" data-tab="po">Purchase Orders</button>
     <!-- Watchlist tab commented out for now.
     <button class="tab-btn" data-tab="watchlist">Watchlist <span class="tab-badge" id="watchBadge" hidden></span></button>
@@ -369,6 +410,17 @@ footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--border);font-
     <section>
       <h2>Reels needed <span class="h2-sub">raw material required to cover this month's items &mdash; widths only, see Notes for reel-yield caveat</span></h2>
       <div class="rawneed-grid" id="homeReelGrid"></div>
+    </section>
+  </div>
+
+  <div class="tab-panel" data-panel="queue" hidden>
+    <section>
+      <h2>Review queue <span class="h2-sub" id="queueSub">emails from Gmail the scanner wasn't fully sure about</span></h2>
+      <div class="empty-note" id="queueUnavailable" hidden>Live review queue needs this artifact's shared database, which isn't available in this preview.</div>
+      <div id="queueApp" hidden>
+        <div class="empty-note" id="queueEmpty" hidden>Nothing waiting on you right now &mdash; the Gmail scan runs twice daily and only adds items here when it's unsure or spots a new PO.</div>
+        <div id="queueList"></div>
+      </div>
     </section>
   </div>
 
@@ -1196,6 +1248,100 @@ function primaryReel(code){
     e.target.reset();
     document.getElementById('matUnit').value = 'reels';
   });
+})();
+
+// ---------- PO review queue (Gmail scan drops entries in the repo; this reads + tracks decisions via db) ----------
+(async function(){
+  const unavailEl = document.getElementById('queueUnavailable');
+  const appEl = document.getElementById('queueApp');
+  if(!unavailEl || !appEl) return;
+  let db;
+  try{ db = window.claude ? await window.claude.use('db') : null; }catch(e){ db = null; }
+  if(!db){ unavailEl.hidden = false; return; }
+  appEl.hidden = false;
+
+  const col = db.collection('review_queue');
+  const emptyEl = document.getElementById('queueEmpty');
+  const listEl = document.getElementById('queueList');
+  const badgeEl = document.getElementById('queueBadge');
+  let seeded = false;
+
+  function slug(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'').slice(0,80) || ('q'+Date.now()); }
+  function fmtWhen(iso){
+    if(!iso) return '&mdash;';
+    const d = new Date(iso);
+    if(isNaN(d)) return iso;
+    return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+  }
+
+  async function seedFromRepo(existingIds){
+    try{
+      const url = 'https://raw.githubusercontent.com/YashKamma/srmt-demand-planner/main/review_queue.json?t=' + Date.now();
+      const res = await fetch(url, {cache:'no-store'});
+      if(!res.ok) return; // file may not exist yet — that's fine
+      const entries = await res.json();
+      if(!Array.isArray(entries)) return;
+      for(const e of entries){
+        const id = slug(e.id || (e.sender+'-'+e.subject+'-'+e.date));
+        if(existingIds.has(id)) continue;
+        await col.doc(id).set({
+          sender: e.sender||'', subject: e.subject||'', date: e.date||'',
+          snippet: e.snippet||'', hasAttachment: !!e.has_attachment,
+          attachmentNames: e.attachment_names||'', category: e.category||'needs_review',
+          poDateGuess: e.po_date_guess||'', status: 'pending', addedAt: new Date().toISOString(), decidedAt: null,
+        });
+      }
+    }catch(e){ console.error('review queue seed failed', e); }
+  }
+
+  function render(docs){
+    const items = docs.map(d=>({id:d.id, ...d.data()}));
+    const pending = items.filter(i=>i.status==='pending');
+    badgeEl.hidden = pending.length===0;
+    badgeEl.textContent = pending.length;
+    emptyEl.hidden = items.length>0;
+    const order = {pending:0, flagged:1, confirmed:2, dismissed:3};
+    items.sort((a,b)=> (order[a.status]??9)-(order[b.status]??9) || (b.date||'').localeCompare(a.date||''));
+
+    const catLabel = {new_po:'Possibly new PO', needs_review:'Needs human judgement', urgent_nudge:'Urgent nudge on existing PO'};
+    listEl.innerHTML = items.map(it=>{
+      const decidedNote = it.status==='confirmed' ? `Confirmed as a new PO on ${fmtWhen(it.decidedAt)} &mdash; send me the PO details/attachment to add it to the dashboard.`
+        : it.status==='dismissed' ? `Dismissed on ${fmtWhen(it.decidedAt)} &mdash; not a new PO.`
+        : it.status==='flagged' ? `Flagged for a closer look on ${fmtWhen(it.decidedAt)}.` : '';
+      return `<div class="queue-card ${it.status}">
+        <div class="queue-head">
+          <div>
+            <h4>${it.subject || '(no subject)'}</h4>
+            <div class="queue-meta">${it.sender||''} &middot; ${fmtWhen(it.date)} ${it.hasAttachment?' &middot; 📎 '+(it.attachmentNames||'attachment'):' &middot; no attachment'}</div>
+          </div>
+          <span class="pill ${it.status==='pending'?'warning':it.status==='confirmed'?'good':it.status==='flagged'?'critical':'neutral'}">${catLabel[it.category]||it.category||'unclassified'}</span>
+        </div>
+        ${it.snippet ? `<div class="queue-snippet">${it.snippet}</div>` : ''}
+        ${it.status==='pending' ? `<div class="queue-actions">
+            <button class="confirm" data-act="confirm" data-id="${it.id}">Yes &mdash; new PO</button>
+            <button class="dismiss" data-act="dismiss" data-id="${it.id}">No &mdash; ignore</button>
+            <button class="flag" data-act="flag" data-id="${it.id}">Not sure, flag it</button>
+          </div>` : `<div class="queue-decided-note">${decidedNote}</div>`}
+      </div>`;
+    }).join('');
+
+    listEl.querySelectorAll('button[data-act]').forEach(b=>{
+      b.addEventListener('click', async ()=>{
+        const id = b.dataset.id;
+        const act = b.dataset.act;
+        const status = act==='confirm' ? 'confirmed' : act==='dismiss' ? 'dismissed' : 'flagged';
+        await col.doc(id).update({status, decidedAt: new Date().toISOString()});
+      });
+    });
+  }
+
+  col.orderBy('addedAt').onSnapshot(
+    async snap => {
+      if(!seeded){ seeded = true; await seedFromRepo(new Set(snap.docs.map(d=>d.id))); }
+      render(snap.docs);
+    },
+    err => { console.error('review queue db error', err); }
+  );
 })();
 
 // ---------- Tabs ----------
