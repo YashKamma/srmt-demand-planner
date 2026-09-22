@@ -1,13 +1,1 @@
-[
-  {
-    "id": "test-push-check-2",
-    "sender": "test@example.com",
-    "subject": "Push capability retest - safe to ignore",
-    "date": "2026-09-22T00:00:00Z",
-    "snippet": "Retest after GitHub App write access was re-authorized.",
-    "has_attachment": false,
-    "attachment_names": "",
-    "category": "needs_review",
-    "po_date_guess": ""
-  }
-]
+[]
