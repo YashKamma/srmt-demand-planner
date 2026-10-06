@@ -9,5 +9,16 @@
     "attachment_names": "1200014332 sunanda.pdf",
     "category": "new_po",
     "po_date_guess": "2026-10-05"
+  },
+  {
+    "id": "1a11045fda9a4dab",
+    "sender": "packdept@srmt.com",
+    "subject": "Purchase Order No.1200014341, Dt.06.10.2026",
+    "date": "2026-10-06",
+    "snippet": "G.S.Subrahmanyam (Asst Manager-Packaging, SRMT) sent a PDF purchase order, No.1200014341 dated 06.10.2026, with no message body beyond \"Please find attached\".",
+    "has_attachment": true,
+    "attachment_names": "1200014341.pdf",
+    "category": "new_po",
+    "po_date_guess": "2026-10-06"
   }
 ]
